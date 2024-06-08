@@ -1,0 +1,113 @@
+3.1 - chmod command
+chmod +xxx vic_sro.sh
+
+*********************************************************************
+
+3.2 - pip command
+pip install -r requirements.txt
+
+*********************************************************************
+
+5.4 - CSS Selector or XPath expression
+//*[@id="main"]/div[2]//*[not(self::script or self::aside)]
+
+*********************************************************************
+
+5.8 - Import Processors
+{
+  "processors" : [
+    {
+      "grok": {
+        "field": "title",
+        "patterns": [
+          "%{GREEDYDATA:title} \\| State Revenue Office",
+          "%{GREEDYDATA:title}"
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "body_content",
+        "ignore_empty_value": true,
+        "copy_from": "body_content_extracted"
+      }
+    },
+    {
+      "remove": {
+        "field": "body_content_extracted",
+        "ignore_missing": true
+      }
+    }
+  ]
+}
+
+*********************************************************************
+
+6.2 - Search Application
+PUT _application/search_application/vic-sro-hybrid
+{
+  "indices": [
+    "search-vic-sro"
+  ],
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": {
+        "_source" : {
+          "includes" : [
+            "body_content",
+            "title",
+            "url"
+          ]
+        },
+        "size" : "{{size}}",
+        "sub_searches" : [
+          {
+            "query" : {
+              "multi_match": {
+                "query" : "{{query_string}}",
+                "type" : "best_fields", 
+                "fields" : ["body_content", "title^2"]
+              }
+            }
+          },
+          {
+            "query" : {
+              "bool" : {
+                "should" : [
+                  {
+                    "text_expansion": {
+                        "ml.inference.body_content_expanded.predicted_value" : {
+                            "model_id" : "{{elser_model_id}}",
+                            "model_text" : "{{query_string}}"
+                        }
+                    }
+                  },
+                  {
+                    "text_expansion": {
+                        "ml.inference.title_expanded.predicted_value" : {
+                            "model_id" : "{{elser_model_id}}",
+                            "model_text" : "{{query_string}}"
+                        }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "rank": {
+          "rrf": {
+            "window_size": 50,
+            "rank_constant": 20
+          }
+        }
+      },
+      "params": {
+        "query_string": "*",
+        "size": 5,
+        "elser_model_id": ".elser_model_1"
+      }
+    }
+  }
+}
