@@ -3,8 +3,10 @@
 This repo contains artifacts & Python programs that can be use to ask a question regarding the data that was ingested and index into Elasticsearch Cloud and query them using a Retrieval Augmented Generation (RAG) demo app.
 
 Pre-requisite
-1. Setup your python virtual environment
-   once setup ```source venv/bin/activate```
+1. Setup your python virtual environment, once setup is complete
+    ```
+     source venv/bin/activate
+    ```
 3. Elastic Cloud Access - go to https://cloud.elastic.co/registration/ and register a new trial.
 
 ElasticSearch Setup
@@ -29,7 +31,8 @@ ElasticSearch Setup
 
    
     
-Quickstart 
+*Quickstart*
+ 
 1. Clone this repo
 2. Enable python virtual environment
 
