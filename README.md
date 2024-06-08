@@ -4,7 +4,8 @@ This repo contains artifacts & Python programs that can be use to ask a question
 
 Pre-requisite
 1. Setup your python virtual environment
-2. Elastic Cloud Access - go to https://cloud.elastic.co/registration/ and register a new trial.
+   once setup ```source venv/bin/activate```
+3. Elastic Cloud Access - go to https://cloud.elastic.co/registration/ and register a new trial.
 
 ElasticSearch Setup
 
