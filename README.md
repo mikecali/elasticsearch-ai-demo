@@ -1,4 +1,4 @@
-**GenAI-Powered Search "using your own Data" Demo**
+***GenAI-Powered Search "using your own Data" Demo***
 
 This repo contains artifacts & Python programs that can be use to ask a question regarding the data that was ingested and index into Elasticsearch Cloud and query them using a Retrieval Augmented Generation (RAG) demo app.
 
@@ -29,9 +29,23 @@ ElasticSearch Setup
       1 ML node
   ```
 
+3. Uploading Contents
+   Get a dataset from your website of choice. We will setup a crawler to that website and index the data to ES.
+   There will be some extra steps that you need to follow to properly massage the data that you need:
+    
+   - From your ESS menu go to Search tab and select Web Crawler, click start.
+   - Make sure that you remember the name of your index.
+   - Then set the domain of the website that you need to crawl, validate domain and add domain - www.nba.com as example
+   - Test your domain by clicking the "Crawl", then select "crawl all domain on this index" to begin crawling the website.
+   - The crawler should start crawling content pretty much immediately, so you should be able to have a look at the documents. From the “Search” menu under “Content” click “Indices”. Then click on the “index you created" index   - To see the documents that have been indexed click on “Documents”, now you can see some of the web pages that have been indexed. You can do a basic search through them if you want! Pick a document, and open it up by clicking on the expand button.
+
+4. Voila, you got your data setup and is ready to use.
+   NOTE: There is always a need to massage the data and you need to do this by going to this steps:
+
+   
    
     
-*Quickstart*
+**Quickstart**
  
 1. Clone this repo
 2. Enable python virtual environment
