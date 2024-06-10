@@ -7,7 +7,7 @@ from gpt_openai_client import gpt_init, gpt_get_available_token_count, gpt_simpl
 
 # read config file
 CONFIG = configparser.ConfigParser()
-CONFIG.read('vic_sro.ini')
+CONFIG.read('config.ini')
 
 # get some basic properties of the conversation
 ORGANISATION_NAME = CONFIG['chat']['OrganisationName']
@@ -144,32 +144,40 @@ def hybrid_search(client: elasticsearch.Elasticsearch, query_string:str):
     )
     return response['hits']['hits']
 
-# Send the initial prompt to the LLM elaborating its purpose in this conversation
+
+
 def answer(hits, query_string):
-    system = f""" Metrobank Debug"""
+    system = f"""Metrobank Debug"""
     context = []
     for hit in hits:
-        context.append(hit['_source'])
+        context.append(hit['_source'])                                
         messages = [
-            { 'role' : 'system', 'content' : f'system\n{json.dumps(context)}' },
-            { 'role' : 'user', 'content' : query_string }
+            {'role': 'system', 'content': f'system\n{json.dumps(context)}'},     
+            {'role': 'user', 'content': query_string}                 
         ]
-        if(gpt_get_available_token_count(messages) < 300):
-            context = context[:-1]
+        if gpt_get_available_token_count(messages) < 300:
+            context = context[:-1]                                    
             break
-    print(len(context))
+
+    # Construct the final messages                                    
     messages = [
-        { 'role' : 'system', 'content' : f'system\n{json.dumps(context)}' },
-        { 'role' : 'user', 'content' : query_string }
+        {'role': 'system', 'content': f'system\n{json.dumps(context)}'},
+        {'role': 'user', 'content': query_string}                     
     ]
-    return gpt_simple_send(messages,1)['choices'][0]['message']['content'].replace('$', '\\$')
 
- #   client = OpenAI(api_key=openai_api_key)
- #   st.session_state.messages.append({"role": "user", "content": prompt})
- #   st.chat_message("user").write(prompt)
- #   response = client.chat.completions.create(model="gpt-3.5-turbo", messages=st.session_state.messages)
- #   msg = response.choices[0].message.content
+    # Get the response from GPT                                       
+    response = gpt_simple_send(messages, 1) 
+    model_response = response.choices[0].message.content
+    print(model_response)
 
+    # Error handling if response is not as expected
+    if not model_response:
+        raise ValueError("Invalid response from GPT model.")  
+        
+    # Extract the content of the first choice
+    response.choices[0].message.content
+    message_content = model_response;
+    return message_content.replace('$', '\\$')
 
 
 esclient = elasticsearch.Elasticsearch(
@@ -180,7 +188,7 @@ esclient = elasticsearch.Elasticsearch(
 st.title(CHAT_NAME)
 query = st.text_input('You want to know: ')
 
-lexicalTab, elserTab, hybridTab, chatTab, finishedTab = st.tabs(['Lexical Search', 'ELSER Search', 'Hybrid Search', 'ChatGPT Questions', 'I\'m Finished!'])
+lexicalTab, elserTab, hybridTab, chatTab = st.tabs(['Lexical Search', 'ELSER Search', 'Hybrid Search', 'ChatGPT Questions'])
 
 with lexicalTab:
     lexical_submit_button = st.button('Search', 'btn_lexical_search')
@@ -214,16 +222,9 @@ with chatTab:
     if chat_submit_button:
         # Once the ask button has been clicked...
         try:
-#            hits = hybrid_search(esclient, query)
+            hits = hybrid_search(esclient, query)
             st.write(answer(hits, query))
         except ValueError as ex:
             st.error(ex)
- #   st.session_state.messages.append({"role": "assistant", "content": msg})
- #   st.chat_message("assistant").write(msg)
 
 
-with finishedTab:
-    finished_submit_button = st.button('Finished!', 'btn_finished')
-    if finished_submit_button:
-        # Once the ask button has been clicked...
-        st.balloons()

@@ -5,6 +5,7 @@ This repo contains artifacts & Python programs that can be use to ask a question
 Pre-requisite
 1. Setup your python virtual environment, once setup is complete
     ```
+     virtualenv venv
      source venv/bin/activate
     ```
 3. Elastic Cloud Access - go to https://cloud.elastic.co/registration/ and register a new trial.
@@ -59,31 +60,32 @@ ElasticSearch Setup
 4. Make a copy of config.ini, rename it to something memorable, and fill out the required settings (note - you can choose Azure or Local LLM):
 
   ```
- [chat]
- OrganisationName = Orgname #something that will be displayed on your web app
- OrganisationCode = orgname-index #index name in ES
+   [chat]
+   OrganisationName = Orgname #something that will be displayed on your web app
+   OrganisationCode = orgname-index #index name in ES
 
- [elastic]
- ElasticCloudId = Elastic cloud ID to send output to
- ElasticPassword = Elasticsearch password to use (optional if using api key)
+   [elastic]
+   ElasticCloudId = Elastic cloud ID to send output to
+   ElasticPassword = Elasticsearch password to use (optional if using api key)
 
- [gpt.openai]
- ApiKey = ChatGPT Key
- Model = gpt-4o
- Temperature = 0
+  [gpt.openai]
+  ApiKey = ChatGPT Key
+  Model = gpt-4o
+  Temperature = 0
 ```
 
 5. Running our search app, Open a command/terminal window and navigate to the unzipped masterclass folder.
 
  ```
- pip install virtualenv
- source env/bin/activate
- pip install -r requirements.txt
+  pip install virtualenv
+  virtualenv venv
+  source env/bin/activate
+  pip install -r requirements.txt
  ```
 
 6. Start the app. A new browser window should open! If it doesn’t, open a browser window and browse to http://localhost:8501
 
  ```
- streamlit run vic-sro.py
+   streamlit run vic-sro.py
  ```
 

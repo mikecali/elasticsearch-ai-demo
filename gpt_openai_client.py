@@ -1,6 +1,8 @@
 import openai
 import tiktoken
 
+openai.api_key = 'xsk-tEhlhyLRZHtGCPmhf2azT3BlbkFJ8DWrsNXGPwVie3fj9dr6'
+
 model_max_tokens = {
     'gpt-3.5-turbo': 60000,
     'gpt-3.5-turbo-0301': 4000,
@@ -76,17 +78,23 @@ def gpt_get_available_token_count(messages) -> int:
     return gpt_max_tokens - num_tokens_from_messages(messages, gpt_model)
 
 def gpt_simple_send(messages, temperature):
-    num_tokens = num_tokens_from_messages(messages, gpt_model)
-    if num_tokens > gpt_max_tokens:
-        raise ValueError(f'Token limit exceeded: {num_tokens} > {gpt_max_tokens}')
-    
-    response = openai.chat.completions.create(
-        model=gpt_model,
-        messages=messages, 
-        temperature=temperature
-    )
-   # Get the response and print it
-    model_response = response.choices[0].message.content
-    print(model_response)
-#    # Add the response to the messages as an Assistant Role
-#    messages.append({"role": "assistant", "content": model_response}) 
+    try:
+        num_tokens = num_tokens_from_messages(messages, gpt_model)
+        if num_tokens > gpt_max_tokens:
+            raise ValueError(f'Token limit exceeded: {num_tokens} > {gpt_max_tokens}')
+
+        response = openai.chat.completions.create(
+            model=gpt_model,
+            messages=messages, 
+            temperature=temperature
+        )
+
+        # Get the response and print it
+        model_response = response.choices[0].message.content
+        print(model_response)
+        
+        return response  # Return the entire response
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
