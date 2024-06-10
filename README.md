@@ -86,6 +86,6 @@ ElasticSearch Setup
 6. Start the app. A new browser window should open! If it doesn’t, open a browser window and browse to http://localhost:8501
 
  ```
-   streamlit run vic-sro.py
+   streamlit run main.py
  ```
 
