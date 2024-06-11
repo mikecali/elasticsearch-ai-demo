@@ -55,7 +55,7 @@ ElasticSearch Setup
 
 3. Ensure dependencies are installed:
 
-  ```pip3 install -r requirements.txt```
+   ```pip3 install -r requirements.txt```
 
 4. Make a copy of config.ini, rename it to something memorable, and fill out the required settings (note - you can choose Azure or Local LLM):
 
