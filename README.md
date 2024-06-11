@@ -1,6 +1,6 @@
 ***GenAI-Powered Search "using your own Data" Demo***
 
-This repo contains artifacts & Python programs that can be use to ask a question regarding the data that was ingested and index into Elasticsearch Cloud and query them using a Retrieval Augmented Generation (RAG) demo app.
+This repo contains artifacts (in snippets.tex) & Python programs that can be use to ask a question regarding the data that was ingested and index into Elasticsearch Cloud and query them using a Retrieval Augmented Generation (RAG) demo app.
 
 Pre-requisite
 1. Setup your python virtual environment, once setup is complete
@@ -39,11 +39,10 @@ ElasticSearch Setup
    - Then set the domain of the website that you need to crawl, validate domain and add domain - www.nba.com as example
    - Test your domain by clicking the "Crawl", then select "crawl all domain on this index" to begin crawling the website.
    - The crawler should start crawling content pretty much immediately, so you should be able to have a look at the documents. From the “Search” menu under “Content” click “Indices”. Then click on the “index you created" index   - To see the documents that have been indexed click on “Documents”, now you can see some of the web pages that have been indexed. You can do a basic search through them if you want! Pick a document, and open it up by clicking on the expand button.
+   - Analyse the document and look for things that you can update/change - this is where you need to massage the data to make sure you crawl the right information that needs to be index to Elasticsearch
 
 4. Voila, you got your data setup and is ready to use.
    NOTE: There is always a need to massage the data and you need to do this by going to this steps:
-
-   
    
     
 **Quickstart**
