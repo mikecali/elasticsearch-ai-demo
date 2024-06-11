@@ -1,5 +1,7 @@
 ***GenAI-Powered Search "using your own Data" Demo***
 
+Acknowledgement and Giving credit where it's due Grant Patterson (Elastic) - thanks for sharing the initial code for me to play with.
+
 This repo contains artifacts (in snippets.tex) & Python programs that can be use to ask a question regarding the data that was ingested and index into Elasticsearch Cloud and query them using a Retrieval Augmented Generation (RAG) demo app.
 
 Pre-requisite
