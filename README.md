@@ -89,3 +89,8 @@ ElasticSearch Setup
    streamlit run main.py
  ```
 
+Example Results:
+
+
+![Image 11-6-2024 at 10 00 AM](https://github.com/mikecali/elasticsearch-ai-demo/assets/17167732/ac84bcd1-dd7d-4051-b97e-c1b8ebfad13c)
+
