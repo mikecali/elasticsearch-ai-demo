@@ -68,10 +68,10 @@ ElasticSearch Setup
    ElasticCloudId = Elastic cloud ID to send output to
    ElasticPassword = Elasticsearch password to use (optional if using api key)
 
-  [gpt.openai]
-  ApiKey = ChatGPT Key
-  Model = gpt-4o
-  Temperature = 0
+   [gpt.openai]
+   ApiKey = ChatGPT Key
+   Model = gpt-4o
+   Temperature = 0
 ```
 
 5. Running our search app, Open a command/terminal window and navigate to the unzipped masterclass folder.
