@@ -47,7 +47,38 @@ ElasticSearch Setup
    NOTE: There is always a need to massage the data and you need to do this by going to this steps:
    
     
-**Quickstart**
+**Quickstart Using Docker**
+1. Clone this repo
+2. Build the docker image
+   
+   ```docker build -t openai-streamlit .```
+
+3. Confirm the docker image
+
+```
+$ docker images
+REPOSITORY                 TAG              IMAGE ID       CREATED              SIZE
+openai-streamlit           latest           05d4d32286b8   About a minute ago   653MB
+```
+4. Run the docker container
+
+```docker run -d -p 8501:8501 openai-streamlit```
+
+5. Since we are using a sample config.ini (for security purposes), you need to copy your own config file
+
+```
+CONTAINER_ID=$(docker ps -alq)
+docker cp config.ini $CONTAINER_ID:/app
+```
+
+6. Access your chat by opening a browser and going to this URL:
+
+```
+localhost:8501
+```
+
+**Quickstart Local Deployment**
+
  
 1. Clone this repo
 2. Enable python virtual environment
