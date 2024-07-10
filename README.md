@@ -70,11 +70,6 @@ openai-streamlit           latest           05d4d32286b8   About a minute ago   
 CONTAINER_ID=$(docker ps -alq)
 docker cp config.ini $CONTAINER_ID:/app
 ```
-6. Run your docker container
-
-```
- docker run -d -p 8501:8501 openai-streamlit
-```
 
 7. Access your chat by opening a browser and going to this URL:
 
