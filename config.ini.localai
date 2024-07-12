@@ -13,12 +13,8 @@ DocumentSearchKey = Y3loN05KQUJRd1RHdzIwX0lrd3k6MFhUTnExblFRdC1Yb3U4S2M0UTN5QQ==
 
 [gpt.openai]
 ApiKey = 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
-#ApiKey = sk-tEhlhyLRZHtGCPmhf2azT3BlbkFJ8DWrsNXGPwVie3fj
+localai = "http://localhost:8080"
 Model = gpt-4o
 Temperature = 0
 
-[localai.openai]
-localaiURL = http://192.168.68.138:8080/
-Model_localai = gpt-4
-Temperature_localai = 0.9
 

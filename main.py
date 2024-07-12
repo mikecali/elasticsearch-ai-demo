@@ -3,7 +3,7 @@ import elasticsearch
 import json
 import streamlit as st
 
-from gpt_openai_client import gpt_init, gpt_get_available_token_count, gpt_simple_send
+from gpt_openai_client import gpt_init, gpt_get_available_token_count, gpt_simple_send, localai_init, localai_answers
 
 # read config file
 CONFIG = configparser.ConfigParser()
@@ -23,11 +23,17 @@ ELASTIC_SEARCH_APPLICATION = f'{ORGANISATION_CODE}-simple'
 
 # init the OpenAI ChatGPT client
 gpt_init(
-    api_key = CONFIG['gpt.openai']['ApiKey'],
-    model = CONFIG['gpt.openai']['Model'],
-    temperature = CONFIG['gpt.openai']['Temperature']
+    api_key=CONFIG['gpt.openai']['ApiKey'],
+    model=CONFIG['gpt.openai']['Model'],
+    temperature=CONFIG['gpt.openai']['Temperature']
 )
 
+# init the LocalAI client
+localai_init(
+    localai_url = CONFIG['localai.openai']['localaiURL'],
+    Model_localai = CONFIG['localai.openai']['Model_localai'],
+    Temperature_localai = CONFIG['localai.openai']['Temperature_localai']
+)
 
 # Converts a crawled Elasticsearch JSON document into markdown text so it's a bit easier to read
 def md_elastic_result(hit, id):
@@ -49,34 +55,18 @@ def md_elastic_results(hits):
         id = id + 1
     return '\n\n'.join(results)
 
-# Example usage with dummy data
-hits = [
-    {
-        "_source": {
-            "title": "Home Loan",
-            "url" : "https://www.metrobank.com.ph",
-            "body_content" : "Hello Metrobank"
-        },
-        "_score": 1
-    }
-]
-
-# Print the results
-print(md_elastic_results(hits))
-
-
 # execute a simple lexical search against Elasticsearch
-def lexical_search(client: elasticsearch.Elasticsearch, query_string:str):
+def lexical_search(client: elasticsearch.Elasticsearch, query_string: str):
     if not client.indices.exists(index=ELASTIC_INDEX):
         raise ValueError(f'Unable to search: Index "{ELASTIC_INDEX}" does not exist.')
 
     response = client.search(
         index=ELASTIC_INDEX,
         query={
-            'multi_match' : {
-                'query' : query_string,
-                'type' : 'best_fields',
-                'fields' : ['body_content', 'title^2']
+            'multi_match': {
+                'query': query_string,
+                'type': 'best_fields',
+                'fields': ['body_content', 'title^2']
             }
         },
         size=5,
@@ -85,10 +75,10 @@ def lexical_search(client: elasticsearch.Elasticsearch, query_string:str):
     return response['hits']['hits']
 
 # execute an ELSER search against Elasticsearch
-def elser_search(client: elasticsearch.Elasticsearch, query_string:str):
+def elser_search(client: elasticsearch.Elasticsearch, query_string: str):
     if not client.indices.exists(index=ELASTIC_INDEX):
         raise ValueError(f'Unable to search: Index "{ELASTIC_INDEX}" does not exist.')
-    properties = esclient.indices.get_mapping(index=ELASTIC_INDEX)[ELASTIC_INDEX]['mappings']['properties']
+    properties = client.indices.get_mapping(index=ELASTIC_INDEX)[ELASTIC_INDEX]['mappings']['properties']
     try:
         if properties['ml']['properties']['inference']['properties']['body_content_expanded']['properties']['predicted_value']['type'] not in ['rank_features', 'sparse_vector']:
             raise ValueError(f'Unable to search: Field "ml.inference.body_content_expanded.predicted_value" in index "{ELASTIC_INDEX}" needs to be of type "sparse_vector".')
@@ -99,25 +89,25 @@ def elser_search(client: elasticsearch.Elasticsearch, query_string:str):
             raise ValueError(f'Unable to search: Field "ml.inference.title_expanded.predicted_value" in index "{ELASTIC_INDEX}" needs to be of type "sparse_vector".')
     except KeyError:
         raise ValueError(f'Unable to search: Field "ml.inference.title_expanded.predicted_value" does not exist in index "{ELASTIC_INDEX}".')
-    
+
     response = client.search(
         index=ELASTIC_INDEX,
         query={
-            "bool" : {
-                "should" : [
+            "bool": {
+                "should": [
                     {
                         "text_expansion": {
-                            "ml.inference.body_content_expanded.predicted_value" : {
-                                "model_id" : ".elser_model_2_linux-x86_64",
-                                "model_text" : query_string
+                            "ml.inference.body_content_expanded.predicted_value": {
+                                "model_id": ".elser_model_2_linux-x86_64",
+                                "model_text": query_string
                             }
                         }
                     },
                     {
                         "text_expansion": {
-                            "ml.inference.title_expanded.predicted_value" : {
-                                "model_id" : ".elser_model_2_linux-x86_64",
-                                "model_text" : query_string
+                            "ml.inference.title_expanded.predicted_value": {
+                                "model_id": ".elser_model_2_linux-x86_64",
+                                "model_text": query_string
                             }
                         }
                     }
@@ -130,55 +120,91 @@ def elser_search(client: elasticsearch.Elasticsearch, query_string:str):
     return response['hits']['hits']
 
 # execute a hybrid search using an Elasticsearch Search Application
-def hybrid_search(client: elasticsearch.Elasticsearch, query_string:str):
-    search_applications = esclient.search_application.list()
+def hybrid_search(client: elasticsearch.Elasticsearch, query_string: str):
+    search_applications = client.search_application.list()
     if search_applications['count'] == 0 or ELASTIC_SEARCH_APPLICATION not in [r['name'] for r in search_applications['results']]:
         raise ValueError(f'Unable to search: Search Application "{ELASTIC_SEARCH_APPLICATION}" does not exist.')
 
     response = client.search_application.search(
         name=ELASTIC_SEARCH_APPLICATION,
         params={
-            'query_string' : query_string,
-            'size' : 5
+            'query_string': query_string,
+            'size': 5
         }
     )
     return response['hits']['hits']
 
-
-
+# Ask ChatGPT
 def answer(hits, query_string):
-    system = f"""Metrobank Debug"""
+    system = f"""RAG Debug"""
     context = []
     for hit in hits:
-        context.append(hit['_source'])                                
+        context.append(hit['_source'])
         messages = [
-            {'role': 'system', 'content': f'system\n{json.dumps(context)}'},     
-            {'role': 'user', 'content': query_string}                 
+            {'role': 'system', 'content': f'system\n{json.dumps(context)}'},
+            {'role': 'user', 'content': query_string}
         ]
         if gpt_get_available_token_count(messages) < 300:
-            context = context[:-1]                                    
+            context = context[:-1]
             break
 
-    # Construct the final messages                                    
+    # Construct the final messages
     messages = [
         {'role': 'system', 'content': f'system\n{json.dumps(context)}'},
-        {'role': 'user', 'content': query_string}                     
+        {'role': 'user', 'content': query_string}
     ]
 
-    # Get the response from GPT                                       
-    response = gpt_simple_send(messages, 1) 
+    # Get the response from GPT
+    response = gpt_simple_send(messages, 1)
     model_response = response.choices[0].message.content
     print(model_response)
 
-    # Error handling if response is not as expected
-    if not model_response:
-        raise ValueError("Invalid response from GPT model.")  
-        
     # Extract the content of the first choice
     response.choices[0].message.content
-    message_content = model_response;
+    message_content = model_response
     return message_content.replace('$', '\\$')
 
+# Ask LocalAI
+def localaianswer(hits, query_string):
+    system = f"""localAI Debug"""
+    context = []
+    for hit in hits:
+        context.append(hit['_source'])
+        messages = [
+            {'role': 'system', 'content': f'system\n{json.dumps(context)}'},
+            {'role': 'user', 'content': query_string}
+        ]
+
+    # Construct the final messages
+    messages = [
+        {'role': 'system', 'content': f'system\n{json.dumps(context)}'},
+        {'role': 'user', 'content': query_string}
+    ]
+
+    # Get the response from LocalAI
+    response = localai_answers(messages, 1)
+
+    if not response:
+        raise ValueError("No response received from LocalAI")
+
+    # Debugging: Print full response
+    print("Full response:", response)
+
+    # Ensure the response is in the expected format
+    if "choices" not in response or not isinstance(response["choices"], list) or not response["choices"]:
+        print("Error: Invalid response structure from LocalAI")
+        raise ValueError("Invalid response structure from LocalAI")
+
+    local_model_response = response["choices"][0].get("message", {}).get("content")
+    if not local_model_response:
+        print("Error: Content not found in LocalAI response")
+        raise ValueError("Content not found in LocalAI response")
+
+    print("LocalAI response content:", local_model_response)
+
+    # Extract the content of the first choice
+    message_content = local_model_response
+    return message_content.replace('$', '\\$')
 
 esclient = elasticsearch.Elasticsearch(
     cloud_id=ELASTIC_CLOUD_ID,
@@ -188,7 +214,7 @@ esclient = elasticsearch.Elasticsearch(
 st.title(CHAT_NAME)
 query = st.text_input('You want to know: ')
 
-lexicalTab, elserTab, hybridTab, chatTab = st.tabs(['Lexical Search', 'ELSER Search', 'Hybrid Search', 'ChatGPT Questions'])
+lexicalTab, elserTab, hybridTab, chatTab, localaiTab = st.tabs(['Lexical Search', 'ELSER Search', 'Hybrid Search', 'ChatGPT Questions', 'LocalAI'])
 
 with lexicalTab:
     lexical_submit_button = st.button('Search', 'btn_lexical_search')
@@ -227,4 +253,17 @@ with chatTab:
         except ValueError as ex:
             st.error(ex)
 
+with localaiTab:
+    model_options = ["gpt-4", "mistral-7b-instruct-v0.3", "ggml-gpt4all-j.bin"]  # Add your model options here
+    selected_model = st.selectbox('Select a model:', model_options)
 
+    chat_submit_button = st.button('Ask', 'btn_localai_ask')
+    if chat_submit_button:
+        # Once the ask button has been clicked...
+        try:
+            hits = hybrid_search(esclient, query)
+            response = localaianswer(hits, query)
+            print("Displaying response on Streamlit page:", response)  # Ensure this is printed
+            st.write(response)  # Display the response on the webpage
+        except ValueError as ex:
+            st.error(ex)
