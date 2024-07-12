@@ -45,7 +45,20 @@ ElasticSearch Setup
 
 4. Voila, you got your data setup and is ready to use.
    NOTE: There is always a need to massage the data and you need to do this by going to this steps:
-   
+
+**Setup your LocalAI**
+
+Deploy your LocalAI instance via Docker
+
+Refer to the get started guide with your fav way of install.
+https://localai.io/basics/getting_started/
+
+```sudo docker run -p 8080:8080  -m 32768m --cpus=0.000 --name local-ai -ti localai/localai:latest-aio-cpu```
+
+To verify your localai deployment, go to:
+
+```http://localhost:8080```
+
     
 **Quickstart Using Docker**
 1. Clone this repo
