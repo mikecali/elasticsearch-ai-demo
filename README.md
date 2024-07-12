@@ -135,7 +135,7 @@ localhost:8501
  ```
 
 Example Results:
-
+<img width="1507" alt="Screenshot 2024-07-12 at 11 26 16 PM" src="https://github.com/user-attachments/assets/46c6cfb5-85a4-4d9f-a288-2f5269ccb008">
 
 ![Image 11-6-2024 at 10 00 AM](https://github.com/mikecali/elasticsearch-ai-demo/assets/17167732/ac84bcd1-dd7d-4051-b97e-c1b8ebfad13c)
 
