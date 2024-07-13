@@ -3,7 +3,7 @@ import elasticsearch
 import json
 import streamlit as st
 
-from gpt_openai_client import gpt_init, gpt_get_available_token_count, gpt_simple_send, localai_init, localai_answers
+from gpt_openai_client import gpt_init, gpt_simple_send, localai_init, localai_answers
 
 # read config file
 CONFIG = configparser.ConfigParser()
@@ -30,9 +30,9 @@ gpt_init(
 
 # init the LocalAI client
 localai_init(
-    localai_url = CONFIG['localai.openai']['localaiURL'],
-    Model_localai = CONFIG['localai.openai']['Model_localai'],
-    Temperature_localai = CONFIG['localai.openai']['Temperature_localai']
+    localai_url=CONFIG['localai.openai']['localaiURL'],
+    Model_localai=CONFIG['localai.openai']['Model_localai'],
+    Temperature_localai=CONFIG['localai.openai']['Temperature_localai']
 )
 
 # Converts a crawled Elasticsearch JSON document into markdown text so it's a bit easier to read
@@ -144,9 +144,6 @@ def answer(hits, query_string):
             {'role': 'system', 'content': f'system\n{json.dumps(context)}'},
             {'role': 'user', 'content': query_string}
         ]
-        if gpt_get_available_token_count(messages) < 300:
-            context = context[:-1]
-            break
 
     # Construct the final messages
     messages = [
@@ -165,7 +162,7 @@ def answer(hits, query_string):
     return message_content.replace('$', '\\$')
 
 # Ask LocalAI
-def localaianswer(hits, query_string):
+def localaianswer(hits, query_string, selected_model):
     system = f"""localAI Debug"""
     context = []
     for hit in hits:
@@ -182,7 +179,7 @@ def localaianswer(hits, query_string):
     ]
 
     # Get the response from LocalAI
-    response = localai_answers(messages, 1)
+    response = localai_answers(messages, selected_model)
 
     if not response:
         raise ValueError("No response received from LocalAI")
@@ -254,7 +251,7 @@ with chatTab:
             st.error(ex)
 
 with localaiTab:
-    model_options = ["gpt-4", "mistral-7b-instruct-v0.3", "ggml-gpt4all-j.bin"]  # Add your model options here
+    model_options = ["gpt-4", "gpt-3.5-turbo", "ggml-gpt4all-j.bin"]  # Add your model options here
     selected_model = st.selectbox('Select a model:', model_options)
 
     chat_submit_button = st.button('Ask', 'btn_localai_ask')
@@ -262,7 +259,7 @@ with localaiTab:
         # Once the ask button has been clicked...
         try:
             hits = hybrid_search(esclient, query)
-            response = localaianswer(hits, query)
+            response = localaianswer(hits, query, selected_model)
             print("Displaying response on Streamlit page:", response)  # Ensure this is printed
             st.write(response)  # Display the response on the webpage
         except ValueError as ex:
