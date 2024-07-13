@@ -4,6 +4,11 @@ Acknowledgement and Giving credit where it's due **Grant Patterson (Elastic)** -
 
 This repo contains artifacts (in snippets.tex) & Python programs that can be use to ask a question regarding the data that was ingested and index into Elasticsearch Cloud and query them using a Retrieval Augmented Generation (RAG) demo app.
 
+**Using LocalAI - here is the working design**
+
+![image](https://github.com/user-attachments/assets/92d354c0-0e0d-4b04-becb-fb4927dc1a57)
+
+
 Pre-requisite
 1. Setup your python virtual environment, once setup is complete
     ```
