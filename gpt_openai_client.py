@@ -1,21 +1,16 @@
 import openai
-import tiktoken
 import requests
 import json
 
-model_max_tokens = {
-    'gpt-4o': 128000
-}
-gpt_max_tokens = 0
 gpt_model = ''
 gpt_temperature = 0
 localai_url_base = ''
+localai_model = ''
+localai_temperature = 0
 
 def gpt_init(api_key, model, temperature):
-    global gpt_max_tokens
     global gpt_model
     global gpt_temperature
-    gpt_max_tokens = model_max_tokens[model]
     gpt_model = model
     gpt_temperature = float(temperature)
     openai.api_key = api_key
@@ -29,48 +24,9 @@ def localai_init(localai_url, Model_localai, Temperature_localai):
     localai_temperature = float(Temperature_localai)
     localai_url_base = localai_url
 
-def num_tokens_from_messages(messages, model):
-    """Return the number of tokens used by a list of messages."""
-    try:
-        encoding = tiktoken.encoding_for_model(model)
-    except KeyError:
-        print('Warning: model not found. Using cl100k_base encoding.')
-        encoding = tiktoken.get_encoding('cl100k_base')
-    if model in [
-        'gpt-3.5-turbo',
-        'gpt-4o'
-    ]:
-        tokens_per_message = 3
-        tokens_per_name = 1
-    elif model == 'gpt-3.5-turbo-0301':
-        tokens_per_message = 4  # every message follows {role/name}\n{content}\n
-        tokens_per_name = -1  # if there's a name, the role is omitted
-    elif 'gpt-3.5-turbo' in model:
-        print('Warning: gpt-3.5-turbo may update over time. Returning num tokens assuming gpt-3.5-turbo-0613.')
-        return num_tokens_from_messages(messages, model='gpt-3.5-turbo-0613')
-    elif 'gpt-4' in model:
-        print('Warning: gpt-4 may update over time. Returning num tokens assuming gpt-4-0613.')
-        return num_tokens_from_messages(messages, model='gpt-4-0613')
-    else:
-        raise NotImplementedError(
-            f'num_tokens_from_messages() is not implemented for model {model}. See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens.'
-        )
-    num_tokens = 0
-    for message in messages:
-        num_tokens += tokens_per_message
-        for key, value in message.items():
-            num_tokens += len(encoding.encode(value))
-            if key == 'name':
-                num_tokens += tokens_per_name
-    num_tokens += 3  # every reply is primed with assistant
-    return num_tokens
-
-def gpt_get_available_token_count(messages) -> int:
-    return gpt_max_tokens - num_tokens_from_messages(messages, gpt_model)
-
 def gpt_simple_send(messages, temperature):
     try:
-        response = openai.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model=gpt_model,
             messages=messages, 
             temperature=temperature
