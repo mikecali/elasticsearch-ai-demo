@@ -26,7 +26,7 @@ def localai_init(localai_url, Model_localai, Temperature_localai):
 
 def gpt_simple_send(messages, temperature):
     try:
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model=gpt_model,
             messages=messages, 
             temperature=temperature
