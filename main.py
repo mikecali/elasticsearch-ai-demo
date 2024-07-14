@@ -1,4 +1,4 @@
-import configparser
+mport configparser
 import elasticsearch
 import json
 import streamlit as st
@@ -36,23 +36,26 @@ localai_init(
 )
 
 # Converts a crawled Elasticsearch JSON document into markdown text so it's a bit easier to read
-def md_elastic_result(hit, id):
+def md_elastic_result(hit, id, max_lines=1, max_chars=20):
     title = f'### {id} - [{hit["_source"]["title"]}]({hit["_source"]["url"]})'
     score = f'**Score:** `{hit["_score"]}`'
     body_content = hit["_source"]["body_content"].replace('$', '\\$')
 
-    # Adding newlines for better readability
-    formatted_body_content = '\n\n'.join(body_content.split('\n\n'))
+    # Adding newlines for better readability and limiting the number of lines and characters
+    truncated_body_content = body_content.split('\n')[:max_lines]
+    formatted_body_content = '\n'.join(truncated_body_content)
+    if len(body_content.split('\n')) > max_lines or len(body_content) > max_chars:
+        formatted_body_content = formatted_body_content[:max_chars] + '...'
 
     return '\n\n'.join([title, score, formatted_body_content])
 
 # Converts a list of crawled Elasticsearch JSON documents into markdown text so they're a bit easier to read
-def md_elastic_results(hits):
+def md_elastic_results(hits, max_lines=1, max_chars=20):
     id = 1
     results = []
     for hit in hits:
-        results.append(md_elastic_result(hit, id))
-        id = id + 1
+        results.append(md_elastic_result(hit, id, max_lines, max_chars))
+        id += 1
     return '\n\n'.join(results)
 
 # execute a simple lexical search against Elasticsearch
