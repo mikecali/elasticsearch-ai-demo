@@ -157,12 +157,11 @@ def answer(hits, query_string):
     # Get the response from GPT
     response = gpt_simple_send(messages, 1)
     model_response = response.choices[0].message.content
-    print(model_response)
-
+   
     # Extract the content of the first choice
     response.choices[0].message.content
     message_content = model_response
-    return message_content.replace('$', '\\$')
+   
 
 # Ask LocalAI
 def localaianswer(hits, query_string, selected_model):
@@ -249,7 +248,8 @@ with chatTab:
         # Once the ask button has been clicked...
         try:
             hits = hybrid_search(esclient, query)
-            st.write(answer(hits, query))
+            result = answer(hits, query)
+            st.write(result)
         except ValueError as ex:
             st.error(ex)
 
