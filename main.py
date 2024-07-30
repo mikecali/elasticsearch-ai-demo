@@ -1,4 +1,4 @@
-mport configparser
+import configparser
 import elasticsearch
 import json
 import streamlit as st
